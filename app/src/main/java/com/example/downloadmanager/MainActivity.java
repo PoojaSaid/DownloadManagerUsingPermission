@@ -19,6 +19,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -27,6 +28,7 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 
 public class MainActivity extends AppCompatActivity {
@@ -38,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private long downloadIdReceivedFromDownloadManager;
     Button mDownloadBtn, mRequestPermission;
     EditText mUrlEt;
+    File folder = new File(Environment.getDownloadCacheDirectory() + File.separator + "DownloadManager");
     DownloadFile mydownload = new DownloadFile();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,8 +117,16 @@ public class MainActivity extends AppCompatActivity {
         switch (requestCode){
             case PERMISSION_STORAGE_CODE:{
                 if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
-                    //Permission granted from popup,perfrom downloading
-                    startDownloading(mUrlEt);
+                    /*//Permission granted from popup,perfrom downloading
+                    Log.v("","Permission: "+permissions[0]+ "was "+grantResults[0]);
+                    //resume tasks needing this permission
+                    //Define the path you want
+                    File mFolder = new File(Environment.getRootDirectory(), "Folder_Name");
+                    if (!mFolder.exists()) {
+                        boolean b = mFolder.mkdirs();
+
+                    }*/
+                        startDownloading(mUrlEt);
                 }else{
                     //Permission denied from popup, show error message
                     Toast.makeText(this, "Permisssion denied......", Toast.LENGTH_SHORT).show();
@@ -143,17 +154,20 @@ public class MainActivity extends AppCompatActivity {
         request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE);
         request.setTitle("Download"); //Set title in download notification
         request.setDescription("Downloading file....."); //Set description in download notification
-        request.allowScanningByMediaScanner();
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-
-//        request.setDestinationInExternalPublicDir( Environment.DIRECTORY_DOWNLOADS, File.separator +FOLDER_NAME + File.separator + "data.pdf");
+        // request.setDestinationInExternalPublicDir( Environment.DIRECTORY_DOWNLOADS, folder.separator +FOLDER_NAME + File.separator + "data.pdf");
 
         //Create folder and pass that path for downloading
-        File TEST = new File(Environment.getDataDirectory(), "TEST");
+   /*     File TEST = new File(Environment.getDataDirectory(), "TEST");
         TEST.mkdir(); // make directory
-        String path = TEST.getAbsolutePath(); // get absolute path
+        String path = TEST.getAbsolutePath(); // get absolute path*/
 
-        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,path);
+//        File folder = new File(Environment.getDownloadCacheDirectory() + File.separator + "DownloadManager");
+        if (!folder.exists()) {
+            folder.mkdirs();
+        }
+       
+        request.setDestinationInExternalPublicDir(Environment.getExternalStorageState(), String.valueOf(folder));
 
         //get download service and enque file
         DownloadManager manager = (DownloadManager)getSystemService(Context.DOWNLOAD_SERVICE);
