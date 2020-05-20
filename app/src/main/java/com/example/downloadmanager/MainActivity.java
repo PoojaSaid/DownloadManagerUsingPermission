@@ -9,8 +9,11 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DownloadManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
@@ -21,10 +24,18 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.text.SimpleDateFormat;
+
 public class MainActivity extends AppCompatActivity {
 
     public static final int PERMISSION_STORAGE_CODE =1000 ;
     public static final int STORAGE_PERMISSION_CODE = 1;
+    public static final String FOLDER_NAME = "Temp";
+    public static final String ID = SimpleDateFormat.getDateInstance().toString();
+    private long downloadIdReceivedFromDownloadManager;
     Button mDownloadBtn, mRequestPermission;
     EditText mUrlEt;
     DownloadFile mydownload = new DownloadFile();
@@ -38,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
         mRequestPermission.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 if(ContextCompat.checkSelfPermission(MainActivity.this,Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED){
                     Toast.makeText(MainActivity.this, "You have already granted permission!", Toast.LENGTH_SHORT).show();
                 }else {
@@ -74,8 +86,8 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void requestStoragePermission() {
-        if(ActivityCompat.shouldShowRequestPermissionRationale(this,Manifest.permission.READ_EXTERNAL_STORAGE)){
+    public  void requestStoragePermission() {
+        if(ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)){
             new AlertDialog.Builder(this)
                     .setTitle("Permission Needed")
                     .setMessage("This permission is needed")
@@ -133,11 +145,20 @@ public class MainActivity extends AppCompatActivity {
         request.setDescription("Downloading file....."); //Set description in download notification
         request.allowScanningByMediaScanner();
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,"" +System.currentTimeMillis()); //Get current timestamp as filename
+
+//        request.setDestinationInExternalPublicDir( Environment.DIRECTORY_DOWNLOADS, File.separator +FOLDER_NAME + File.separator + "data.pdf");
+
+        //Create folder and pass that path for downloading
+        File TEST = new File(Environment.getDataDirectory(), "TEST");
+        TEST.mkdir(); // make directory
+        String path = TEST.getAbsolutePath(); // get absolute path
+
+        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,path);
+
         //get download service and enque file
         DownloadManager manager = (DownloadManager)getSystemService(Context.DOWNLOAD_SERVICE);
-        manager.enqueue(request);
-
+       manager.enqueue(request);
+        //CommonMethod.log(TAG, "Download id " + downloadIdReceivedFromDownloadManager);
 
     }
 
