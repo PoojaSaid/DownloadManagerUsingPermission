@@ -45,6 +45,7 @@ import java.text.SimpleDateFormat;
 
 public class MainActivity extends AppCompatActivity  {
 
+    CommonMethod obj = new CommonMethod();
     public static final int PERMISSION_EXTERNALSTORAGE_CODE = 1000;
     public static final int PERMISSION_INTERNALSTORAGE_CODE = 1001;
     public static final int STORAGE_PERMISSION_CODE = 1;
@@ -182,7 +183,9 @@ public class MainActivity extends AppCompatActivity  {
                             .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, path);
                     manager.enqueue(request);
                     try{
+//                        FileUtils.copy(source,destination);
                         copy(source,destination);
+                        Toast.makeText(this, "Download Completed", Toast.LENGTH_SHORT).show();
                     }catch(Exception e){
                         e.getMessage();
                     }
@@ -279,6 +282,7 @@ public class MainActivity extends AppCompatActivity  {
         return mimeTypemap.getExtensionFromMimeType(resolver.getType(uri));
     }
 
+
     public static void copy(File src, File dst) throws IOException {
         if (!dst.exists()) {
             dst.mkdirs();
@@ -303,4 +307,5 @@ public class MainActivity extends AppCompatActivity  {
             in.close();
         }
     }
+
 }
