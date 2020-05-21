@@ -36,6 +36,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -97,29 +99,6 @@ public class MainActivity extends AppCompatActivity  {
             }
         });
 
-        /*mDownloadInternalBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
-                    if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
-                        //Permission denied, request it
-                        String[] permissions = {Manifest.permission.WRITE_EXTERNAL_STORAGE};
-
-                        //Show popup for runtime permission
-                        requestPermissions(permissions, PERMISSION_EXTERNALSTORAGE_CODE);
-
-                    } else {
-                        //Permission already granted it then perform download
-                        startDownloadingInInternal(mUrlEt);
-                    }
-                } else {
-                    //OS is less than the marshmellow then perform download
-                    startDownloadingInInternal(mUrlEt);
-                }
-
-            }
-        });
-        */
     }
 
     public void requestStoragePermission() {
@@ -202,15 +181,24 @@ public class MainActivity extends AppCompatActivity  {
                             .setMimeType(getMimeType(Uri.parse(url)))
                             .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, path);
                     manager.enqueue(request);
-                    registerReceiver(new BroadcastReceiver() {
+                    try{
+                        copy(source,destination);
+                    }catch(Exception e){
+                        e.getMessage();
+                    }
+                    /*copy(source,destination);
+                  registerReceiver(new BroadcastReceiver() {
                         @Override
                         public void onReceive(Context context, Intent intent) {
                             long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
                             //Checking if the received broadcast is for our enqueued download by matching download id
                             if (downloadID == id) {
+
                                 try {
                                     source.getPath();
                                     FileUtils.copy(new FileInputStream(source), new FileOutputStream(destination));
+                                    copy(source,destination);
+                                    copy(source,destination);
                                 } catch (FileNotFoundException e) {
                                     e.printStackTrace();
                                 } catch (IOException e) {
@@ -220,7 +208,7 @@ public class MainActivity extends AppCompatActivity  {
                             }
                         }
                     }, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-
+*/
                 } else {
                     Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
                     startActivity(intent);
@@ -289,5 +277,30 @@ public class MainActivity extends AppCompatActivity  {
         ContentResolver resolver = getContentResolver();
         MimeTypeMap mimeTypemap = MimeTypeMap.getSingleton();
         return mimeTypemap.getExtensionFromMimeType(resolver.getType(uri));
+    }
+
+    public static void copy(File src, File dst) throws IOException {
+        if (!dst.exists()) {
+            dst.mkdirs();
+        }
+        if (!src.exists()) {
+            throw new IllegalArgumentException("sourceDir does not exist");
+        }
+        InputStream in = new FileInputStream(src);
+        try {
+            OutputStream out = new FileOutputStream(dst);
+            try {
+                // Transfer bytes from in to out
+                byte[] buf = new byte[1024];
+                int len;
+                while ((len = in.read(buf)) > 0) {
+                    out.write(buf, 0, len);
+                }
+            } finally {
+                out.close();
+            }
+        } finally {
+            in.close();
+        }
     }
 }
