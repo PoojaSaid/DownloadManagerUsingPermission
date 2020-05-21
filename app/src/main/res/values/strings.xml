@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">DownloadManager</string>
     <string name="request_permission">Request permission</string>
-    <string name="download">Download in external storage</string>
+    <string name="download">Download and copy to external storage</string>
     <string name="enter_url">Enter url.....</string>
     <string name="no">No</string>
     <string name="yes">Yes</string>

@@ -1,6 +1,7 @@
 package com.example.downloadmanager;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -15,11 +16,13 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.FileUtils;
 import android.util.Log;
 import android.view.View;
 import android.webkit.MimeTypeMap;
@@ -29,9 +32,13 @@ import android.widget.RadioButton;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 
 public class MainActivity extends AppCompatActivity  {
@@ -39,16 +46,16 @@ public class MainActivity extends AppCompatActivity  {
     public static final int PERMISSION_EXTERNALSTORAGE_CODE = 1000;
     public static final int PERMISSION_INTERNALSTORAGE_CODE = 1001;
     public static final int STORAGE_PERMISSION_CODE = 1;
-    Button mDownloadExternalBtn, mRequestPermission, mDownloadInternalBtn;
+    Button mDownloadExternalBtn, mRequestPermission;
     EditText mUrlEt;
-
+    private long downloadID;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         mDownloadExternalBtn = findViewById(R.id.btn_download);
-        mDownloadInternalBtn = findViewById(R.id.btn_downloadInternal);
+
         mUrlEt = findViewById(R.id.et_url);
         mRequestPermission = findViewById(R.id.btn_requestPermission);
 
@@ -66,9 +73,8 @@ public class MainActivity extends AppCompatActivity  {
 
             }
         });
-
-
-        mDownloadExternalBtn.setOnClickListener(new View.OnClickListener() {
+//        registerReceiver(onDownloadComplete,new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+        /*mDownloadExternalBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
@@ -113,7 +119,7 @@ public class MainActivity extends AppCompatActivity  {
 
             }
         });
-
+        */
     }
 
     public void requestStoragePermission() {
@@ -150,14 +156,14 @@ public class MainActivity extends AppCompatActivity  {
                     Toast.makeText(this, "Permisssion denied......", Toast.LENGTH_SHORT).show();
                 }
             }
-            case PERMISSION_INTERNALSTORAGE_CODE: {
+           /* case PERMISSION_INTERNALSTORAGE_CODE: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     startDownloadingInInternal(mUrlEt);
                 } else {
                     //Permission denied from popup, show error message
                     Toast.makeText(this, "Permisssion denied......", Toast.LENGTH_SHORT).show();
                 }
-            }
+            }*/
             case STORAGE_PERMISSION_CODE: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
@@ -177,12 +183,16 @@ public class MainActivity extends AppCompatActivity  {
         if (url.length() > 0) {
             DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
 
-            File TEST = new File(Environment.getDataDirectory(), "TEST");
-            TEST.mkdir(); // make directory
-            String path = TEST.getAbsolutePath(); // get absolute path
+            String sourcePath = Environment.getDataDirectory().getAbsolutePath();
+            final File source  = new File(sourcePath,"Test");
+            //File TEST = new File(Environment.getDataDirectory().getAbsolutePath(), "TEST");
+            source.mkdir(); // make directory
+            String path = source.getAbsolutePath(); // get absolute path
+
+             final File destination = new File(Environment.getDownloadCacheDirectory().getAbsoluteFile(), "DownloadManager");
             try {
                 if (manager != null) {
-                    DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+                    final DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
 
                     request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE)
                             .setTitle("Download") //Set title in download notification
@@ -192,7 +202,24 @@ public class MainActivity extends AppCompatActivity  {
                             .setMimeType(getMimeType(Uri.parse(url)))
                             .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, path);
                     manager.enqueue(request);
-                    Toast.makeText(this, "Download started", Toast.LENGTH_SHORT).show();
+                    registerReceiver(new BroadcastReceiver() {
+                        @Override
+                        public void onReceive(Context context, Intent intent) {
+                            long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
+                            //Checking if the received broadcast is for our enqueued download by matching download id
+                            if (downloadID == id) {
+                                try {
+                                    source.getPath();
+                                    FileUtils.copy(new FileInputStream(source), new FileOutputStream(destination));
+                                } catch (FileNotFoundException e) {
+                                    e.printStackTrace();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                                Toast.makeText(MainActivity.this, "Download Completed", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    }, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
 
                 } else {
                     Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
@@ -208,7 +235,7 @@ public class MainActivity extends AppCompatActivity  {
 
     }
 
-    public void startDownloadingInInternal(EditText ed_url) {
+  /*  public void startDownloadingInInternal(EditText ed_url) {
 
         String url = ed_url.getText().toString().trim();
 
@@ -243,13 +270,24 @@ public class MainActivity extends AppCompatActivity  {
             }
         }
 
-    }
+    }*/
 
+    public BroadcastReceiver onDownloadComplete = new BroadcastReceiver()
+    {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            //Fetching the download id received with the broadcast
+            long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
+            //Checking if the received broadcast is for our enqueued download by matching download id
+            if (downloadID == id) {
+                Toast.makeText(MainActivity.this, "Download Completed", Toast.LENGTH_SHORT).show();
+            }
+        }
+    };
 
     private String getMimeType(Uri uri) {
         ContentResolver resolver = getContentResolver();
         MimeTypeMap mimeTypemap = MimeTypeMap.getSingleton();
         return mimeTypemap.getExtensionFromMimeType(resolver.getType(uri));
     }
-
 }
