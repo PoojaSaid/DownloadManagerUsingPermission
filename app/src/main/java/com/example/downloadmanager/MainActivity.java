@@ -10,6 +10,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.DialogInterface;
@@ -21,8 +22,10 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioButton;
 import android.widget.Toast;
 
 import java.io.File;
@@ -31,31 +34,33 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity  {
 
-    public static final int PERMISSION_STORAGE_CODE =1000 ;
+    public static final int PERMISSION_EXTERNALSTORAGE_CODE = 1000;
+    public static final int PERMISSION_INTERNALSTORAGE_CODE = 1001;
     public static final int STORAGE_PERMISSION_CODE = 1;
-    public static final String FOLDER_NAME = "Temp";
-    public static final String ID = SimpleDateFormat.getDateInstance().toString();
-    private long downloadIdReceivedFromDownloadManager;
-    Button mDownloadBtn, mRequestPermission;
+    Button mDownloadExternalBtn, mRequestPermission, mDownloadInternalBtn;
     EditText mUrlEt;
-    File folder = new File(Environment.getDownloadCacheDirectory() + File.separator + "DownloadManager");
-    DownloadFile mydownload = new DownloadFile();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mDownloadBtn = findViewById(R.id.btn_download);
+
+        mDownloadExternalBtn = findViewById(R.id.btn_download);
+        mDownloadInternalBtn = findViewById(R.id.btn_downloadInternal);
         mUrlEt = findViewById(R.id.et_url);
         mRequestPermission = findViewById(R.id.btn_requestPermission);
+
+
+        //For grant permission
         mRequestPermission.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                if(ContextCompat.checkSelfPermission(MainActivity.this,Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED){
+                if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
                     Toast.makeText(MainActivity.this, "You have already granted permission!", Toast.LENGTH_SHORT).show();
-                }else {
+                } else {
                     requestStoragePermission();
                 }
 
@@ -63,41 +68,63 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        mDownloadBtn.setOnClickListener(new View.OnClickListener() {
+        mDownloadExternalBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                //If OS is mashmellow or above than  that please handle it
-                if(Build.VERSION.SDK_INT >Build.VERSION_CODES.M){
-                    if(checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED){
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
+                    if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
                         //Permission denied, request it
-                        String [] permissions = {Manifest.permission.WRITE_EXTERNAL_STORAGE};
+                        String[] permissions = {Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
                         //Show popup for runtime permission
-                        requestPermissions(permissions,PERMISSION_STORAGE_CODE);
+                        requestPermissions(permissions, PERMISSION_EXTERNALSTORAGE_CODE);
 
-                    }else {
+                    } else {
                         //Permission already granted it then perform download
-                       startDownloading(mUrlEt);
+                        startDownloadingInExternal(mUrlEt);
                     }
-                }else{
+                } else {
                     //OS is less than the marshmellow then perform download
-                    startDownloading(mUrlEt);
+                    startDownloadingInExternal(mUrlEt);
                 }
 
             }
         });
+
+        mDownloadInternalBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
+                    if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
+                        //Permission denied, request it
+                        String[] permissions = {Manifest.permission.WRITE_EXTERNAL_STORAGE};
+
+                        //Show popup for runtime permission
+                        requestPermissions(permissions, PERMISSION_EXTERNALSTORAGE_CODE);
+
+                    } else {
+                        //Permission already granted it then perform download
+                        startDownloadingInInternal(mUrlEt);
+                    }
+                } else {
+                    //OS is less than the marshmellow then perform download
+                    startDownloadingInInternal(mUrlEt);
+                }
+
+            }
+        });
+
     }
 
-    public  void requestStoragePermission() {
-        if(ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)){
+    public void requestStoragePermission() {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
             new AlertDialog.Builder(this)
                     .setTitle("Permission Needed")
                     .setMessage("This permission is needed")
                     .setPositiveButton("ok", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            ActivityCompat.requestPermissions(MainActivity.this,new String []{Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERMISSION_CODE);
+                            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERMISSION_CODE);
                         }
                     })
                     .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
@@ -107,36 +134,35 @@ public class MainActivity extends AppCompatActivity {
                         }
                     })
                     .create().show();
-        }else {
-            ActivityCompat.requestPermissions(this,new String []{Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERMISSION_CODE);
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERMISSION_CODE);
         }
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode){
-            case PERMISSION_STORAGE_CODE:{
-                if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
-                    /*//Permission granted from popup,perfrom downloading
-                    Log.v("","Permission: "+permissions[0]+ "was "+grantResults[0]);
-                    //resume tasks needing this permission
-                    //Define the path you want
-                    File mFolder = new File(Environment.getRootDirectory(), "Folder_Name");
-                    if (!mFolder.exists()) {
-                        boolean b = mFolder.mkdirs();
-
-                    }*/
-                        startDownloading(mUrlEt);
-                }else{
+        switch (requestCode) {
+            case PERMISSION_EXTERNALSTORAGE_CODE: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    startDownloadingInExternal(mUrlEt);
+                } else {
                     //Permission denied from popup, show error message
                     Toast.makeText(this, "Permisssion denied......", Toast.LENGTH_SHORT).show();
                 }
             }
-            case STORAGE_PERMISSION_CODE:{
-                if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+            case PERMISSION_INTERNALSTORAGE_CODE: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    startDownloadingInInternal(mUrlEt);
+                } else {
+                    //Permission denied from popup, show error message
+                    Toast.makeText(this, "Permisssion denied......", Toast.LENGTH_SHORT).show();
+                }
+            }
+            case STORAGE_PERMISSION_CODE: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
                     Toast.makeText(this, "Permission GRANTED", Toast.LENGTH_SHORT).show();
-                }else{
+                } else {
                     //Permission denied from popup, show error message
                     Toast.makeText(this, "Permisssion denied......", Toast.LENGTH_SHORT).show();
                 }
@@ -144,37 +170,86 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void startDownloading(EditText ed_url) {
-        //Get url/text from edit text
+    public void startDownloadingInExternal(EditText ed_url) {
+
         String url = ed_url.getText().toString().trim();
 
-        //Create Download Request
-        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
-        //Allow types of network to download files
-        request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE);
-        request.setTitle("Download"); //Set title in download notification
-        request.setDescription("Downloading file....."); //Set description in download notification
-        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-        // request.setDestinationInExternalPublicDir( Environment.DIRECTORY_DOWNLOADS, folder.separator +FOLDER_NAME + File.separator + "data.pdf");
+        if (url.length() > 0) {
+            DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
 
-        //Create folder and pass that path for downloading
-   /*     File TEST = new File(Environment.getDataDirectory(), "TEST");
-        TEST.mkdir(); // make directory
-        String path = TEST.getAbsolutePath(); // get absolute path*/
+            File TEST = new File(Environment.getDataDirectory(), "TEST");
+            TEST.mkdir(); // make directory
+            String path = TEST.getAbsolutePath(); // get absolute path
+            try {
+                if (manager != null) {
+                    DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
 
-//        File folder = new File(Environment.getDownloadCacheDirectory() + File.separator + "DownloadManager");
-        if (!folder.exists()) {
-            folder.mkdirs();
+                    request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE)
+                            .setTitle("Download") //Set title in download notification
+                            .setDescription("Downloading file.....")
+                            .setAllowedOverRoaming(true)//Set description in download notification
+                            .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                            .setMimeType(getMimeType(Uri.parse(url)))
+                            .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, path);
+                    manager.enqueue(request);
+                    Toast.makeText(this, "Download started", Toast.LENGTH_SHORT).show();
+
+                } else {
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                    startActivity(intent);
+                }
+            } catch (Exception e) {
+                Toast.makeText(this, "Something went wrong", Toast.LENGTH_SHORT).show();
+                Log.e("ERROR:MAIN", "E: " + e.getMessage());
+            }
+        } else {
+            Toast.makeText(this, "Please enter all the fields", Toast.LENGTH_SHORT).show();
         }
-       
-        request.setDestinationInExternalPublicDir(Environment.getExternalStorageState(), String.valueOf(folder));
-
-        //get download service and enque file
-        DownloadManager manager = (DownloadManager)getSystemService(Context.DOWNLOAD_SERVICE);
-       manager.enqueue(request);
-        //CommonMethod.log(TAG, "Download id " + downloadIdReceivedFromDownloadManager);
 
     }
 
+    public void startDownloadingInInternal(EditText ed_url) {
+
+        String url = ed_url.getText().toString().trim();
+
+        if (url.length() == 0) {
+            Toast.makeText(this, "Please enter all the fields", Toast.LENGTH_SHORT).show();
+
+        } else {
+            DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+            File folder = new File(Environment.getDownloadCacheDirectory() + File.separator + "DownloadManager");
+            try {
+                if (manager != null) {
+                    DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+
+                    request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE)
+                            .setTitle("Download") //Set title in download notification
+                            .setDescription("Downloading file.....")
+                            .setAllowedOverRoaming(true)//Set description in download notification
+                            .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                            .setMimeType(getMimeType(Uri.parse(url)));
+
+                    request.setDestinationInExternalPublicDir(Environment.getExternalStorageState(), String.valueOf(folder));
+                    manager.enqueue(request);
+                    Toast.makeText(this, "Download started", Toast.LENGTH_SHORT).show();
+
+                } else {
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                    startActivity(intent);
+                }
+            } catch (Exception e) {
+                Toast.makeText(this, "Something went wrong", Toast.LENGTH_SHORT).show();
+                Log.e("ERROR:MAIN", "E: " + e.getMessage());
+            }
+        }
+
+    }
+
+
+    private String getMimeType(Uri uri) {
+        ContentResolver resolver = getContentResolver();
+        MimeTypeMap mimeTypemap = MimeTypeMap.getSingleton();
+        return mimeTypemap.getExtensionFromMimeType(resolver.getType(uri));
+    }
 
 }

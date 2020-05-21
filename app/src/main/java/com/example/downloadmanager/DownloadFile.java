@@ -14,8 +14,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 
-import static com.example.downloadmanager.MainActivity.PERMISSION_STORAGE_CODE;
-
 public class DownloadFile {
 
 
