@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity  {
             }
         });
 //        registerReceiver(onDownloadComplete,new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-        /*mDownloadExternalBtn.setOnClickListener(new View.OnClickListener() {
+        mDownloadExternalBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity  {
             }
         });
 
-        mDownloadInternalBtn.setOnClickListener(new View.OnClickListener() {
+        /*mDownloadInternalBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
