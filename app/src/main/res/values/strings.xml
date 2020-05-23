@@ -1,10 +1,11 @@
 <resources>
     <string name="app_name">DownloadManager</string>
     <string name="request_permission">Request permission</string>
-    <string name="download">Download and copy to external storage</string>
+    <string name="download">Download </string>
     <string name="enter_url">Enter url.....</string>
     <string name="no">No</string>
     <string name="yes">Yes</string>
     <string name="text">You want to add file in internal Storage</string>
     <string name="download_in_sd_card">Download in SD card</string>
+    <string name="tv_heading">File copy after downloading it.</string>
 </resources>
