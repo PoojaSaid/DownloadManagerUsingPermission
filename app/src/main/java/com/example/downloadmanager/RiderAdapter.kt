@@ -8,7 +8,6 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.example.downloadmanager.RiderAdapter.RiderViewHolder
-import java.util.*
 import kotlin.collections.ArrayList
 
 class RiderAdapter(context: Context?, riderList: ArrayList<LstRider>) : RecyclerView.Adapter<RiderViewHolder>() {
@@ -17,17 +16,11 @@ class RiderAdapter(context: Context?, riderList: ArrayList<LstRider>) : Recycler
 
 
     init {
-
         this.riderList.addAll(riderList)
-
-    }
-
-    interface ItemClicked {
-        fun onItemClikcked(index: Int)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RiderViewHolder {
-        val v = LayoutInflater.from(parent.context).inflate(R.layout.rider_list_card_view, parent, false)
+        val v = LayoutInflater.from(parent.context).inflate(R.layout.list_rider, parent, false)
         return RiderViewHolder(v)
     }
 

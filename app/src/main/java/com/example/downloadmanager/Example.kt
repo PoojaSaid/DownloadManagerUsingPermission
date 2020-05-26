@@ -108,11 +108,11 @@ data class Example(
         @Expose
         private val lifeStage: String? = null,
 
-/*@SerializedName("lstFund")
-@Expose
-private List<Object> lstFund = null;*/
+        @SerializedName("lstFund")
+        @Expose val lstFund: ArrayList<LstFund> = ArrayList(),
+
         @SerializedName("lstRider")
-        @Expose val lstRider: ArrayList<LstRider> =ArrayList(),
+        @Expose val lstRider: ArrayList<LstRider> = ArrayList(),
 
         @SerializedName("No.ofPolicies")
         @Expose
