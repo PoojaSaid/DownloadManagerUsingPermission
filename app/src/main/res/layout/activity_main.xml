@@ -72,5 +72,14 @@
         android:textStyle="bold"
         android:text="@string/gson_converter" />
 
+    <Button
+        android:id="@+id/btn_riderList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="10dp"
+        android:text="@string/rider_list"
+        android:textStyle="bold" />
 
 </LinearLayout>

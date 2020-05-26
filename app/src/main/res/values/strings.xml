@@ -12,4 +12,5 @@
     <string name="copy_file">Copy file</string>
     <string name="gson_converter">Gson Converter</string>
     <string name="hello_download_manager">Hello Download Manager!</string>
+    <string name="rider_list">Rider List</string>
 </resources>
