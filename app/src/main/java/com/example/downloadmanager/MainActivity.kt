@@ -163,43 +163,13 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     fun convertToGson(): String {
 
-        var jsonStr ="{\"LA\":{\"IsSmoker\":false,\"IsJNKResident\":null,\"ClientId\":null,\"ClientFullName\":\"Purshottam Thakkar\",\"FirstName\":null," +
-                "\"MiddleName\":null,\"LastName\":null,\"IsMale\":true,\"DOB\":\"20 Apr 1980\",\"MobileNumber\":\"8169938807\"," +
-                "\"EmailId\":\"tano88@yahoo.com\"},\"Proposer\":{\"ClientId\":null,\"ClientFullName\":\"PurshottamDad Thakkar\"," +
-                "\"FirstName\":null,\"MiddleName\":null,\"LastName\":null,\"RelationWithProposer\":\"Brother\",\"IsMale\":false,\"DOB\":\"20 Jan 1980\"," +
-                "\"MobileNumber\":\"9773097566\",\"EmailId\":\"test@gmail.com\"},\"lstRider\":[{\"RiderId\":\"30004\"," +
-                "\"RiderName\":\"Future Generali Linked Accidental Death Rider\",\"RiderCode\":null,\"RiderBasePremium\":null,\"GST\":45," +
-                "\"InstallmentPremium\":250,\"AnnualPremiumAmount\":295,\"PremiumServiceTax\":null,\"ExTaxPremium\":null,\"PolicyTerm\":10," +
-                "\"PremiumPayingTerm\":5,\"SumAssured\":500000,\"ProtectionCover\":null,\"ExBackDatePremium\":null,\"BackDatePremium\":null}]," +
-                "\"lstFund\":[{\"FundID\":\"21001\",\"FundCode\":null,\"FundComposition\":\"5\"},{\"FundID\":\"21005\",\"FundCode\":null," +
-                "\"FundComposition\":\"10\"},{\"FundID\":\"21004\",\"FundCode\":null,\"FundComposition\":\"15\"},{\"FundID\":\"21003\",\"FundCode\":null," +
-                "\"FundComposition\":\"10\"},{\"FundID\":\"21002\",\"FundCode\":null,\"FundComposition\":\"10\"},{\"FundID\":\"21007\",\"FundCode\":null," +
-                "\"FundComposition\":\"25\"},{\"FundID\":\"21006\",\"FundCode\":null,\"FundComposition\":\"25\"}],\"ProductCode\":\"U44\"," +
-                "\"ProductId\":\"21022\",\"QuoteNo\":null,\"ProductName\":\"Future Generali Dhan Vridhi \"," +
-                "\"BasePremium\":null,\"AgeProofDocCode\":\"LEVGCERT\",\"GST\":0,\"isLAProposerSame\":\"0\",\"SumAssured\":500000," +
-                "\"InstallmentPremium\":50000,\"AnnualPremiumAmount\":50000,\"ReferenceNumber\":\"PQRS\",\"TotalPremiumwithGST\":50000," +
-                "\"PremiumServiceTax\":null,\"ExTaxPremium\":null,\"PolicyFees\":null,\"PolicyTerm\":\"10\",\"PremiumPayingTerm\":\"5\"," +
-                "\"PaymentFrequency\":\"1\",\"ProtectionCover\":null,\"IsBackDateRequired\":null,\"BackDate\":null,\"ExBackDatePremium\":null," +
-                "\"BackDatePremium\":null,\"FundValueFor4\":null,\"FundValueFor8\":null,\"PreferedRenewalMode\":null,\"IsUlip\":true,\"IsNSAP\":false," +
-                "\"AgeProof\":\"Leaving Certificate\",\"IsStaff\":true,\"LifeStage\":\"1\",\"ProposerAnnualIncome\":\"5.0\",\"RiskApproach\":\"3\"," +
-                "\"ExistingSumAssured\":\"0.0\",\"No.ofPolicies\":\"0\",\"LifeGoal\":\"2\",\"CurrentValueOfGoal\":\"15\",\"TimetoAccomplish\":\"15\"," +
-                "\"FutureValueOfGoal\":\"36\"}\n"
+        var jsonStr ="{\"LA\":{\"IsSmoker\":false,\"IsJNKResident\":null,\"ClientId\":null,\"ClientFullName\":\"Purshottam Thakkar\",\"FirstName\":null,\"MiddleName\":null,\"LastName\":null,\"IsMale\":true,\"DOB\":\"20 Apr 1980\",\"MobileNumber\":\"8169938807\",\"EmailId\":\"tano88@yahoo.com\"},\"Proposer\":{\"ClientId\":null,\"ClientFullName\":\"PurshottamDad Thakkar\",\"FirstName\":null,\"MiddleName\":null,\"LastName\":null,\"RelationWithProposer\":\"Brother\",\"IsMale\":false,\"DOB\":\"20 Jan 1980\",\"MobileNumber\":\"9773097566\",\"EmailId\":\"test@gmail.com\"},\"lstRider\":[{\"RiderId\":\"30004\",\"RiderName\":\"Future Generali Linked Accidental Death Rider\",\"RiderCode\":null,\"RiderBasePremium\":null,\"GST\":45,\"InstallmentPremium\":250,\"AnnualPremiumAmount\":295,\"PremiumServiceTax\":null,\"ExTaxPremium\":null,\"PolicyTerm\":10,\"PremiumPayingTerm\":5,\"SumAssured\":500000,\"ProtectionCover\":null,\"ExBackDatePremium\":null,\"BackDatePremium\":null}],\"lstFund\":[{\"FundID\":\"21001\",\"FundCode\":null,\"FundComposition\":\"5\"},{\"FundID\":\"21005\",\"FundCode\":null,\"FundComposition\":\"10\"},{\"FundID\":\"21004\",\"FundCode\":null,\"FundComposition\":\"15\"},{\"FundID\":\"21003\",\"FundCode\":null,\"FundComposition\":\"10\"},{\"FundID\":\"21002\",\"FundCode\":null,\"FundComposition\":\"10\"},{\"FundID\":\"21007\",\"FundCode\":null,\"FundComposition\":\"25\"},{\"FundID\":\"21006\",\"FundCode\":null,\"FundComposition\":\"25\"}],\"ProductCode\":\"U44\",\"ProductId\":\"21022\",\"QuoteNo\":null,\"ProductName\":\"Future Generali Dhan Vridhi \",\"BasePremium\":null,\"AgeProofDocCode\":\"LEVGCERT\",\"GST\":0,\"isLAProposerSame\":\"0\",\"SumAssured\":500000,\"InstallmentPremium\":50000,\"AnnualPremiumAmount\":50000,\"ReferenceNumber\":\"PQRS\",\"TotalPremiumwithGST\":50000,\"PremiumServiceTax\":null,\"ExTaxPremium\":null,\"PolicyFees\":null,\"PolicyTerm\":\"10\",\"PremiumPayingTerm\":\"5\",\"PaymentFrequency\":\"1\",\"ProtectionCover\":null,\"IsBackDateRequired\":null,\"BackDate\":null,\"ExBackDatePremium\":null,\"BackDatePremium\":null,\"FundValueFor4\":null,\"FundValueFor8\":null,\"PreferedRenewalMode\":null,\"IsUlip\":true,\"IsNSAP\":false,\"AgeProof\":\"Leaving Certificate\",\"IsStaff\":true,\"LifeStage\":\"1\",\"ProposerAnnualIncome\":\"5.0\",\"RiskApproach\":\"3\",\"ExistingSumAssured\":\"0.0\",\"No.ofPolicies\":\"0\",\"LifeGoal\":\"2\",\"CurrentValueOfGoal\":\"15\",\"TimetoAccomplish\":\"15\",\"FutureValueOfGoal\":\"36\",\"PdfData\":{\"PdfName\":\"M002200140\",\"PdfPath\":\"\\/storage\\/emulated\\/0\\/Documents\\/FutureGenerali\\/M002200140.pdf\"}}"
         jsonStr = jsonStr.replace("\\/".toRegex(), "")
+
         // Creates new instance of Gson
         val gson = Gson()
 
-        val element: JsonElement
-
         try {
-            /*//Converts the json string to JsonElement without POJO
-            element = gson.fromJson(jsonStr, JsonElement::class.java)
-
-            var data = element.asJsonObject
-
-            var listRider = data.get("lstRider")*/
-            /*productRecyclerView.itemAnimator = DefaultItemAnimator()
-            productRecyclerView.layoutManager = LinearLayoutManager(context)
-            productRecyclerView.adapter = recommendedProductAdapter*/
 
             val jsonObject: Example = gson.fromJson(jsonStr, Example::class.java)
 
